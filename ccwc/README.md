@@ -10,5 +10,5 @@ Implementing John Crickett's [Coding Challenge #1 - Build your own wc!](https://
 * [x] Step 3: Implement command line option -w that outputs the number of words in a file
 * [x] Step 4: Implement command line option -m that outputs the number of characters in a file
 * [x] Step 5: Implement default option that outputs information similar to when -c, -l, -w flags are passed
-* [] Final Step: Implement read from standard input if no filename is specified
+* [x] Final Step: Implement read from standard input if no filename is specified
 * [] Bonus: Implement unit tests

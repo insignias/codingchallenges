@@ -45,7 +45,6 @@ func main() {
 	}
 	
 	if wordCount {
-		
 		fmt.Printf("    %d", wc)
 	}
 
@@ -54,7 +53,7 @@ func main() {
 		fmt.Printf("    %d", cc)
 	}
 
-	if !byteCount && !lineCount && !wordCount && !characterCount {
+	if flag.NFlag() == 0 {
 		fmt.Printf("    %d    %d    %d", lc, wc, bc)
 	}
 

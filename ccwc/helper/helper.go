@@ -4,18 +4,18 @@ import (
 	"bufio"
 	"bytes"
 	"fmt"
+	"io"
 	"os"
 )
 
 func ReadFile(filename string) ([]byte) {
-	if len(filename) == 0 {
-		fmt.Println("then do something")
-	}
-
 	// ReadFile
 	b, err := os.ReadFile(filename)
 	if err != nil {
-		fmt.Println(err)
+		b, err = io.ReadAll(os.Stdin)
+		if err != nil {
+			fmt.Println(err)
+		}
 	}
 
 	return b
