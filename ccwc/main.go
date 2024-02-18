@@ -1,11 +1,9 @@
 package main
 
 import (
-	"bufio"
-	"bytes"
 	"flag"
 	"fmt"
-	"os"
+	"github.com/insignias/codingchallenges/ccwc/helper"
 )
 
 var (
@@ -24,46 +22,40 @@ func main() {
 
 	// get filename
 	filename := flag.Arg(0)
-	if len(filename) == 0 {
-		fmt.Println("then do something")
-	}
 
-	// ReadFile
-	b, err := os.ReadFile(filename)
-	if err != nil {
-		fmt.Println(err)
-	}
+	//ReadFile
+	b := helper.ReadFile(filename)
+
+	//byteCount
+	bc := helper.GetByteCount(b)
+
+	//lineCount
+	lc := helper.GetLineCount(b)
+
+	//wordCount
+	wc := helper.GeWordCount(b)
 
 	if byteCount {
-		fmt.Printf("    %d", len(b))
+		fmt.Printf("    %d", bc)
 	}
 
-	reader := bytes.NewReader(b)
-	scanner := bufio.NewScanner(reader)
 	if lineCount {
-		lc := 0
-		for scanner.Scan() {
-			lc++
-		}
+		
 		fmt.Printf("    %d", lc)
 	}
 	
 	if wordCount {
-		wc := 0
-		scanner.Split(bufio.ScanWords)
-		for scanner.Scan() {
-			wc++
-		}
+		
 		fmt.Printf("    %d", wc)
 	}
 
 	if characterCount {
-		cc := 0
-		scanner.Split(bufio.ScanRunes)
-		for scanner.Scan() {
-			cc++
-		}
+		cc := helper.GetCharacterCount(b)
 		fmt.Printf("    %d", cc)
+	}
+
+	if !byteCount && !lineCount && !wordCount && !characterCount {
+		fmt.Printf("    %d    %d    %d", lc, wc, bc)
 	}
 
 	fmt.Printf(" %s\n", filename)
