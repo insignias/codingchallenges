@@ -9,15 +9,17 @@ import (
 )
 
 var (
-	characterCount bool
+	byteCount bool
 	lineCount bool
 	wordCount bool
+	characterCount bool
 )
 
 func main() {
-	flag.BoolVar(&characterCount, "c", false, "get character count")
+	flag.BoolVar(&byteCount, "c", false, "get byte count")
 	flag.BoolVar(&lineCount, "l", false, "get line count")
 	flag.BoolVar(&wordCount, "w", false, "get word count")
+	flag.BoolVar(&characterCount, "m", false, "get character count")
 	flag.Parse()
 
 	// get filename
@@ -32,7 +34,7 @@ func main() {
 		fmt.Println(err)
 	}
 
-	if characterCount {
+	if byteCount {
 		fmt.Printf("    %d", len(b))
 	}
 
@@ -53,6 +55,15 @@ func main() {
 			wc++
 		}
 		fmt.Printf("    %d", wc)
+	}
+
+	if characterCount {
+		cc := 0
+		scanner.Split(bufio.ScanRunes)
+		for scanner.Scan() {
+			cc++
+		}
+		fmt.Printf("    %d", cc)
 	}
 
 	fmt.Printf(" %s\n", filename)
