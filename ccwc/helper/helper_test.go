@@ -9,7 +9,7 @@ import (
 	"testing"
 )
 
-var filepath string = "../tes.txt"
+var filepath string = "../test.txt"
 
 func init() {
 	_, err := os.Stat(filepath)
@@ -23,10 +23,7 @@ func TestHelper(t *testing.T) {
 
 	type testCase struct {
 		name string
-		byteOption bool
-		lineOption bool
-		wordOption bool
-		characterOption bool
+		flagOption bool
 		args []string
 		actualOutputFn func(b []byte) int
 	}
@@ -34,25 +31,25 @@ func TestHelper(t *testing.T) {
 	testCases := []testCase{
 		{
 			name: "get byte count",
-			byteOption: true,
+			flagOption: true,
 			args: []string{"wc", "-c", filepath},
 			actualOutputFn: GetByteCount,
 		},
 		{
 			name: "get line count",
-			lineOption: true,
+			flagOption: true,
 			args: []string{"wc", "-l", filepath},
 			actualOutputFn: GetLineCount,
 		},
 		{
 			name: "get word count",
-			wordOption: true,
+			flagOption: true,
 			args: []string{"wc", "-w", filepath},
 			actualOutputFn: GetWordCount,
 		},
 		{
 			name: "get character count",
-			characterOption: true,
+			flagOption: true,
 			args: []string{"wc", "-m", filepath},
 			actualOutputFn: GetCharacterCount,
 		},
@@ -60,10 +57,12 @@ func TestHelper(t *testing.T) {
 
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
-			actualOutput := getActualOutput(tc.actualOutputFn, b)
-			expectedOutput := getExpectedOutput(tc.args)
-			if actualOutput != expectedOutput {
-				t.Errorf("Expected %d but got %d", expectedOutput, actualOutput)
+			if tc.flagOption {
+				actualOutput := getActualOutput(tc.actualOutputFn, b)
+				expectedOutput := getExpectedOutput(tc.args)
+				if actualOutput != expectedOutput {
+					t.Errorf("Expected %d but got %d", expectedOutput, actualOutput)
+				}
 			}
 		})
 	}
