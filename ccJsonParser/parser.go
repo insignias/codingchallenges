@@ -10,7 +10,7 @@ type Parser struct {
 
 func NewParser(input string) *Parser {
 	l := Newlexer(input)
-	return &Parser{l}
+	return &Parser{l: l}
 }
 
 func (p *Parser) Parse() (interface{}, error){
@@ -38,6 +38,8 @@ func (p *Parser) ParseToken(tok Token) (interface{}, error) {
 	switch tok.Type {
 	case BeginObject:
 		value, err = p.ParseObject(make(map[string]interface{}))
+	case String:
+		value = tok.Value
 	case EOF:
 		err = fmt.Errorf("unexpected end of file")
 	}
@@ -52,5 +54,41 @@ func (p *Parser) ParseObject(obj map[string]interface{}) (interface{}, error){
 	if tok.Type == EndObject {
 		return obj, err
 	}
+
+	for{
+		if tok.Type != String {
+			return obj, fmt.Errorf("expected key but got %s", tok.Value)
+		} 
+
+		key := tok.Value
+
+		tok = p.l.NextToken()
+
+		if tok.Type != ValueSeparator {
+			return obj, fmt.Errorf("expected ':' but got %s", tok.Value)
+		}
+
+		tok = p.l.NextToken()
+
+		value, err := p.ParseToken(tok)
+		if err != nil {
+			return value, err
+		}
+
+		obj[key] = value
+
+		tok = p.l.NextToken()
+
+		if tok.Type != ObjectSeparator {
+			break
+		}
+
+		tok = p.l.NextToken()
+	}
+
+	if tok.Type != EndObject {
+		return obj, fmt.Errorf("expected } but got %s", tok.Value)
+	}
+	
 	return obj, err
 }
