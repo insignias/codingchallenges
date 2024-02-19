@@ -24,7 +24,7 @@ func main() {
 	filename := flag.Arg(0)
 
 	//ReadFile
-	b := helper.ReadFile(filename)
+	b := helper.ReadFromFileOrStdin(filename)
 
 	//byteCount
 	bc := helper.GetByteCount(b)
@@ -33,7 +33,7 @@ func main() {
 	lc := helper.GetLineCount(b)
 
 	//wordCount
-	wc := helper.GeWordCount(b)
+	wc := helper.GetWordCount(b)
 
 	if byteCount {
 		fmt.Printf("    %d", bc)

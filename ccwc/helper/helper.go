@@ -8,7 +8,7 @@ import (
 	"os"
 )
 
-func ReadFile(filename string) ([]byte) {
+func ReadFromFileOrStdin(filename string) ([]byte) {
 	// ReadFile
 	b, err := os.ReadFile(filename)
 	if err != nil {
@@ -41,7 +41,7 @@ func GetLineCount(b []byte) int {
 	return lc
 }
 
-func GeWordCount(b []byte) int {
+func GetWordCount(b []byte) int {
 	scanner := getNewScanner(b)
 	wc := 0
 	scanner.Split(bufio.ScanWords)
