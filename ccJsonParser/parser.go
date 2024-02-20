@@ -38,6 +38,8 @@ func (p *Parser) ParseToken(tok Token) (interface{}, error) {
 	switch tok.Type {
 	case BeginObject:
 		value, err = p.ParseObject(make(map[string]interface{}))
+	case BeginArray:
+		value, err = p.ParseArray(make([]interface{}, 0))
 	case String:
 		value = tok.Value
 	case Number:
@@ -55,6 +57,38 @@ func (p *Parser) ParseToken(tok Token) (interface{}, error) {
 	}
 
 	return value, err
+}
+
+func (p *Parser) ParseArray(arr []interface{}) (interface{}, error) {
+	var err error
+	tok := p.l.NextToken()
+
+	if tok.Type == EndArray {
+		return arr, err
+	}
+
+	for {
+		value, err := p.ParseToken(tok)
+		if err != nil {
+			return arr, err
+		}
+
+		arr = append(arr, value)
+
+		tok = p.l.NextToken()
+
+		if tok.Type != ObjectSeparator {
+			break
+		}
+
+		tok = p.l.NextToken()
+	}
+
+	if tok.Type != EndArray {
+		return arr, fmt.Errorf("expected ] but got %s", tok.Value)
+	}
+
+	return arr, err
 }
 
 func (p *Parser) ParseObject(obj map[string]interface{}) (interface{}, error){

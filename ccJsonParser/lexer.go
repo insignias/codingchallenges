@@ -1,6 +1,7 @@
 package main
 
 import (
+
 	"unicode"
 )
 
@@ -17,6 +18,8 @@ var (
 	// Structure
 	BeginObject TokenType = "{"
 	EndObject TokenType = "}"
+	BeginArray TokenType = "["
+	EndArray TokenType = "]"
 	ValueSeparator TokenType = ":"
 	ObjectSeparator TokenType = ","
 	//Literal
@@ -70,12 +73,18 @@ func (l *Lexer) NextToken() Token{
 		tok = Token{BeginObject, string(l.ch)}
 	case '}':
 		tok = Token{EndObject, string(l.ch)}
+	case '[':
+		tok = Token{BeginArray, string(l.ch)}
+	case ']':
+		tok = Token{EndArray, string(l.ch)}
 	case ':':
 		tok = Token{ValueSeparator, string(l.ch)}
 	case ',':
 		tok = Token{ObjectSeparator, string(l.ch)}
 	case '"':
-		tok = l.readString()
+		tok = l.readString('"')
+	case '\'':
+		tok = l.readString('\'')
 	case 0:
 		tok = Token{EOF, ""}
 	default:
@@ -91,10 +100,11 @@ func (l *Lexer) NextToken() Token{
 	return tok
 }
 
+
 func (l *Lexer) readRegex() Token {
 	position := l.lastPosition
 	for {
-		if l.peekChar() == ' ' || l.peekChar() == '\n' || l.peekChar() == ','{
+		if l.peekChar() == ' ' || l.peekChar() == '\\' || l.peekChar() == ',' || l.peekChar() == ':' {
 			break
 		}
 		l.readChar()
@@ -152,14 +162,18 @@ func (l *Lexer) readLiteral() Token {
 	return tok
 }
 
-func (l *Lexer) readString() Token {
+func (l *Lexer) readString(val byte) Token {
 	var tok Token
 	position := l.lastPosition + 1
 
 	for {
 		l.readChar()
-		if l.ch == '"' {
-			tok = Token{String, l.input[position:l.lastPosition]}
+		if l.ch == val {
+			if val == '"' {
+				tok = Token{String, l.input[position:l.lastPosition]}
+			} else if val == '\'' {
+				tok = Token{Illegal, l.input[position:l.lastPosition]}
+			}
 			break
 		} else if (l.ch == 0) {
 			tok = Token{Illegal, l.input[position:l.lastPosition]}
