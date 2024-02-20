@@ -18,7 +18,7 @@ func (p *Parser) Parse() (interface{}, error){
 	var err error
 
 	tok := p.l.NextToken()
-
+	
 	output, err = p.ParseToken(tok)
 	
 	tok = p.l.NextToken()
@@ -48,6 +48,8 @@ func (p *Parser) ParseToken(tok Token) (interface{}, error) {
 		value = tok.Value
 	case Null:
 		value = nil
+	case Illegal:
+		err = fmt.Errorf("illegal entry")
 	case EOF:
 		err = fmt.Errorf("unexpected end of file")
 	}

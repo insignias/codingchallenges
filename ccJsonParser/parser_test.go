@@ -58,7 +58,7 @@ func TestParser(t *testing.T){
 		{
 			name: "step3 invalid",
 			inputFilePath: "tests/step3/invalid.json",
-			expectedValue: map[string]interface{}{"key1": "true","key2": nil,"key3": nil,"key4": "value","key5": "101"},
+			expectedValue: nil,
 			expectedError: true,
 		},
 	}
