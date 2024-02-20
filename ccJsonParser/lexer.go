@@ -1,5 +1,9 @@
 package main
 
+import (
+	"unicode"
+)
+
 type TokenType string
 
 type Token struct {
@@ -17,6 +21,13 @@ var (
 	ObjectSeparator TokenType = ","
 	//Literal
 	String TokenType = "string"
+	Number TokenType = "number"
+	True TokenType = "true"
+	False TokenType = "false"
+	Null TokenType = "null"
+	//Operator
+	Minus TokenType = "-"
+	Dot TokenType = "."
 )
 
 type Lexer struct {
@@ -68,9 +79,76 @@ func (l *Lexer) NextToken() Token{
 	case 0:
 		tok = Token{EOF, ""}
 	default:
-		tok = Token{Illegal, string(l.ch)}
+		if (l.isDigit(l.ch) || l.ch == '-' || l.ch == '.') {
+			tok = l.readNumber()
+		} else if (l.isLiteral(l.ch)) {
+			tok = l.readLiteral()
+		} else {
+			tok = l.readRegex()
+		}
 	}
 	l.readChar()
+	return tok
+}
+
+func (l *Lexer) readRegex() Token {
+	position := l.lastPosition
+	for {
+		if l.peekChar() == ' ' || l.peekChar() == '\n' || l.peekChar() == ','{
+			break
+		}
+		l.readChar()
+	}
+	return Token{Illegal, l.input[position:l.currentPosition]}
+}
+
+func (l *Lexer) isDigit(input byte) bool {
+	return unicode.IsNumber(rune(input))
+}
+
+func (l *Lexer) readNumber() Token {
+	position := l.lastPosition
+	for (l.isDigit(l.peekChar()) || l.peekChar() == '.')  {
+		l.readChar()
+	}
+	return Token{Number, l.input[position:l.currentPosition]}
+}
+
+func (l *Lexer) isLiteral(ch byte) bool {
+	return ch == 't' || ch == 'f' || ch == 'n'
+}
+
+func (l *Lexer) readLiteral() Token {
+	var tok Token
+	position := l.lastPosition
+
+	switch l.ch {
+	case 't':
+		for i, c := range True[1:] {
+			if rune(l.peekChar()) != c {
+				return Token{Illegal, l.input[position:position+i]}
+			}
+			l.readChar()
+		}
+		tok = Token{True, "true"}
+	case 'f':
+		for i, c := range False[1:] {
+			if rune(l.peekChar()) != c {
+				return Token{Illegal, l.input[position:position+i]}
+			}
+			l.readChar()
+		}
+		tok = Token{False, "false"}
+	case 'n':
+		for i, c := range Null[1:] {
+			if rune(l.peekChar()) != c {
+				return Token{Illegal, l.input[position:position+i]}
+			}
+			l.readChar()
+		}
+		tok = Token{Null, "null"}
+	}
+
 	return tok
 }
 

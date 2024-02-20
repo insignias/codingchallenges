@@ -49,6 +49,18 @@ func TestParser(t *testing.T){
 			expectedValue: map[string]interface{}{"key": "value","key2": "value"},
 			expectedError: false,
 		},
+		{
+			name: "step3 valid",
+			inputFilePath: "tests/step3/valid.json",
+			expectedValue: map[string]interface{}{"key1": "true","key2": "false","key3": nil,"key4": "value","key5": "101"},
+			expectedError: false,
+		},
+		{
+			name: "step3 invalid",
+			inputFilePath: "tests/step3/invalid.json",
+			expectedValue: map[string]interface{}{"key1": "true","key2": nil,"key3": nil,"key4": "value","key5": "101"},
+			expectedError: true,
+		},
 	}
 
 	for _, tt := range testCases {

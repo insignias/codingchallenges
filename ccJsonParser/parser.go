@@ -40,6 +40,14 @@ func (p *Parser) ParseToken(tok Token) (interface{}, error) {
 		value, err = p.ParseObject(make(map[string]interface{}))
 	case String:
 		value = tok.Value
+	case Number:
+		value = tok.Value
+	case True:
+		value = tok.Value
+	case False:
+		value = tok.Value
+	case Null:
+		value = nil
 	case EOF:
 		err = fmt.Errorf("unexpected end of file")
 	}
