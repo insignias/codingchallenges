@@ -2,13 +2,17 @@ package main
 
 import (
 	"bufio"
+
+	"fmt"
 	"log"
 	"os"
 	"os/exec"
+	"strconv"
 	"testing"
 )
 
 var filepath string = "tests/sample.tsv"
+var filepath2 string = "tests/fourchords.csv"
 
 func init() {
 	_, err := os.Stat(filepath)
@@ -18,19 +22,29 @@ func init() {
 }
 
 func TestMain(t *testing.T) {
-	file := Readfile(filepath)
-	scanner := GetNewScanner(file)
 
 	testCases := []struct{
 		name string
 		actualOutputArgs []string
-		expectedArgs int
-		expectedOutputFn func(*bufio.Scanner, *int) (string, error)
+		expectedArgs []string
+		expectedOutputFn func(*bufio.Scanner, int, string) (string, error)
 	} {
 		{
-			name: "Test valid field",
-			actualOutputArgs: []string{"cut", "-f", filepath},
-			expectedArgs: 2,
+			name: "Test default delimiter",
+			actualOutputArgs: []string{"cut", "-f2", filepath},
+			expectedArgs: []string{"2", "	", filepath},
+			expectedOutputFn: GetFields,
+		},
+		{
+			name: "Test custom delimiter",
+			actualOutputArgs: []string{"cut", "-f2", "-d,", filepath2},
+			expectedArgs: []string{"2", ",", filepath2},
+			expectedOutputFn: GetFields,
+		},
+		{
+			name: "Test wrong delimiter",
+			actualOutputArgs: []string{"cut", "-f2", "-d,", filepath},
+			expectedArgs: []string{"2", ",", filepath},
 			expectedOutputFn: GetFields,
 		},
 	}
@@ -38,7 +52,15 @@ func TestMain(t *testing.T) {
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
 			actualOutput := getActualOutput(tc.actualOutputArgs)
-			expectedOutput, err := getExpectedOutput(tc.expectedOutputFn, scanner, &tc.expectedArgs)
+			field, err := strconv.Atoi(tc.expectedArgs[0])
+			if err != nil {
+				fmt.Println(err)
+				return
+			}
+			file := Readfile(tc.expectedArgs[2])
+			scanner := GetNewScanner(file)
+
+			expectedOutput, err := getExpectedOutput(tc.expectedOutputFn, scanner, field, tc.expectedArgs[1])
 			if err != nil {
 				t.Error(err)
 			}
@@ -58,6 +80,6 @@ func getActualOutput(args []string) string {
 	return string(output)
 }
 
-func getExpectedOutput(fn func(scanner *bufio.Scanner, field *int) (string, error), scanner *bufio.Scanner, field *int) (string, error) {
-	return fn(scanner, field)
+func getExpectedOutput(fn func(scanner *bufio.Scanner, field int, delimiter string) (string, error), scanner *bufio.Scanner, field int, delimiter string) (string, error) {
+	return fn(scanner, field, delimiter)
 }
