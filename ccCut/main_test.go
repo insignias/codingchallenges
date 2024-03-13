@@ -2,12 +2,10 @@ package main
 
 import (
 	"bufio"
-
-	"fmt"
+	"strings"
 	"log"
 	"os"
 	"os/exec"
-	"strconv"
 	"testing"
 )
 
@@ -27,7 +25,7 @@ func TestMain(t *testing.T) {
 		name string
 		actualOutputArgs []string
 		expectedArgs []string
-		expectedOutputFn func(*bufio.Scanner, int, string) (string, error)
+		expectedOutputFn func(*bufio.Scanner, []int, string) (string, error)
 	} {
 		{
 			name: "Test default delimiter",
@@ -47,25 +45,40 @@ func TestMain(t *testing.T) {
 			expectedArgs: []string{"2", ",", filepath},
 			expectedOutputFn: GetFields,
 		},
+		{
+			name: "Test multiple fields",
+			actualOutputArgs: []string{"cut", "-f2,3", "-d,", filepath},
+			expectedArgs: []string{"2,3", ",", filepath},
+			expectedOutputFn: GetFields,
+		},
+		{
+			name: "Test invalid field",
+			actualOutputArgs: []string{"cut", "-f6", "-d,", filepath},
+			expectedArgs: []string{"6", ",", filepath},
+			expectedOutputFn: GetFields,
+		},
+		{
+			name: "Test field with spaces",
+			actualOutputArgs: []string{"cut", "-f1 2", "-d,", filepath},
+			expectedArgs: []string{"1 2", ",", filepath},
+			expectedOutputFn: GetFields,
+		},
 	}
 
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
 			actualOutput := getActualOutput(tc.actualOutputArgs)
-			field, err := strconv.Atoi(tc.expectedArgs[0])
-			if err != nil {
-				fmt.Println(err)
-				return
-			}
+			field := tc.expectedArgs[0]
+			fields := formatFields(&field)
 			file := Readfile(tc.expectedArgs[2])
 			scanner := GetNewScanner(file)
 
-			expectedOutput, err := getExpectedOutput(tc.expectedOutputFn, scanner, field, tc.expectedArgs[1])
+			expectedOutput, err := getExpectedOutput(tc.expectedOutputFn, scanner, fields, tc.expectedArgs[1])
 			if err != nil {
 				t.Error(err)
 			}
-			if actualOutput != expectedOutput {
-				t.Errorf("Expected %s but got %s", expectedOutput, actualOutput)
+			if strings.Trim(actualOutput, "\n%") != strings.Trim(expectedOutput, "\n%") {
+				t.Errorf("Expected \n%s but got \n%s", expectedOutput, actualOutput)
 			}
 			
 		})
@@ -80,6 +93,6 @@ func getActualOutput(args []string) string {
 	return string(output)
 }
 
-func getExpectedOutput(fn func(scanner *bufio.Scanner, field int, delimiter string) (string, error), scanner *bufio.Scanner, field int, delimiter string) (string, error) {
-	return fn(scanner, field, delimiter)
+func getExpectedOutput(fn func(scanner *bufio.Scanner, fields []int, delimiter string) (string, error), scanner *bufio.Scanner, fields []int, delimiter string) (string, error) {
+	return fn(scanner, fields, delimiter)
 }
