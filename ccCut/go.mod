@@ -1,3 +1,3 @@
-module github.com/insignias/ccCut
+module github.com/insignias/codingchallenges/ccCut
 
 go 1.21.3

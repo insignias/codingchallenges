@@ -2,12 +2,13 @@ package main
 
 import (
 	"bufio"
+	"bytes"
 	"flag"
 	"fmt"
-	"log"
 	"os"
 	"strconv"
 	"strings"
+	"github.com/insignias/codingchallenges/ccCut/helper"
 )
 
 func main() {
@@ -17,37 +18,18 @@ func main() {
 	flag.Parse()
 
 	intFields := formatFields(fields)
-	// var fs []string
-	// if strings.Contains(*fields, ",") {
-	// 	fs = strings.Split(*fields, ",")
-	// } else {
-	// 	fs = strings.Split(*fields, " ")
-	// }
-
-	
-
-	// for _, f := range fs {
-	// 	num, err := strconv.Atoi(f)
-	// 	if err != nil {
-	// 		fmt.Println(err)
-	// 		return
-	// 	}
-	// 	intFields = append(intFields, num)
-	// }
 
 	filename := flag.Arg(0)
 
-	file := Readfile(filename)
-	defer file.Close()
+	b := helper.ReadFromFileOrStdin(filename)
 
-	scanner := GetNewScanner(file)
+	scanner := GetNewScanner(b)
 
 	output, err := GetFields(scanner, intFields, *delimiter)
 	if err != nil {
 		fmt.Println(err)
 	}
 	fmt.Println(output)
-
 }
 
 func formatFields(fields *string) []int {
@@ -70,17 +52,9 @@ func formatFields(fields *string) []int {
 	return intFields
 }
 
-func Readfile(filename string) *os.File {
-	file, err := os.Open(filename)
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	return file
-}
-
-func GetNewScanner(file *os.File) *bufio.Scanner {
-	return bufio.NewScanner(file)
+func GetNewScanner(b []byte) *bufio.Scanner {
+	reader := bytes.NewReader(b)
+	return bufio.NewScanner(reader)
 }
 
 func GetFields(scanner *bufio.Scanner, fields []int, delimiter string) (string, error){
@@ -95,14 +69,10 @@ func GetFields(scanner *bufio.Scanner, fields []int, delimiter string) (string, 
 		lines = append(lines, line)
 	}
 
-	for _, line := range lines {
+	for idx, line := range lines {
 		columns := strings.Split(line, delimiter)
 		if !strings.Contains(line, delimiter) {
-			// if idx == len(lines)-1 {
-			// 	output += fmt.Sprint(columns[0] + "%")
-			// } else {
-				output += fmt.Sprintln(columns[0])
-			// }
+			output += fmt.Sprintln(columns[0])
 			continue
 		}
 
@@ -123,7 +93,11 @@ func GetFields(scanner *bufio.Scanner, fields []int, delimiter string) (string, 
 				output += fmt.Sprint(columns[field-1])
 			}
 		}
-		output += fmt.Sprintln()
+
+		if idx != len(lines)-1 {
+			output += fmt.Sprintln()
+		}
+		
 	}
 
 	return output, err

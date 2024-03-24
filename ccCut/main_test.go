@@ -7,10 +7,11 @@ import (
 	"os"
 	"os/exec"
 	"testing"
+	"github.com/insignias/codingchallenges/ccCut/helper"
 )
 
-var filepath string = "tests/sample.tsv"
-var filepath2 string = "tests/fourchords.csv"
+var filepath string = "files/sample.tsv"
+var filepath2 string = "files/fourchords.csv"
 
 func init() {
 	_, err := os.Stat(filepath)
@@ -70,13 +71,14 @@ func TestMain(t *testing.T) {
 			actualOutput := getActualOutput(tc.actualOutputArgs)
 			field := tc.expectedArgs[0]
 			fields := formatFields(&field)
-			file := Readfile(tc.expectedArgs[2])
-			scanner := GetNewScanner(file)
+			b := helper.ReadFromFileOrStdin(tc.expectedArgs[2])
+			scanner := GetNewScanner(b)
 
 			expectedOutput, err := getExpectedOutput(tc.expectedOutputFn, scanner, fields, tc.expectedArgs[1])
 			if err != nil {
 				t.Error(err)
 			}
+			
 			if strings.Trim(actualOutput, "\n%") != strings.Trim(expectedOutput, "\n%") {
 				t.Errorf("Expected \n%s but got \n%s", expectedOutput, actualOutput)
 			}
